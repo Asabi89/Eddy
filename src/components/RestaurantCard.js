@@ -1,7 +1,10 @@
-// components/RestaurantCard.js - Composant Carte Restaurant
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { COLORS, FONTS, SPACING } from '../theme';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 48) / 2; // 2 columns with padding
 
 export default function RestaurantCard({ restaurant, onClick }) {
   return (
@@ -11,34 +14,15 @@ export default function RestaurantCard({ restaurant, onClick }) {
         style={styles.image}
         resizeMode="cover"
       />
-
+      
       <View style={styles.content}>
-        <View style={styles.headerRow}>
-          <Text style={styles.name}>{restaurant.name}</Text>
-          <View style={styles.ratingBadge}>
-            <MaterialIcons name="star" size={14} color="#eab308" />
-            <Text style={styles.rating}>{restaurant.rating}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.cuisine}>
-          {restaurant.cuisine} • {restaurant.priceRange}
-        </Text>
-
-        <View style={styles.infoRow}>
-          <MaterialIcons name="schedule" size={14} color="#999" />
-          <Text style={styles.info}>
-            {restaurant.deliveryTime} • {restaurant.distance}
-          </Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={styles.delivery}>
-            Livraison : {restaurant.deliveryFee} FCFA
-          </Text>
-          <TouchableOpacity style={styles.viewButton}>
-            <Text style={styles.viewButtonText}>Voir menu</Text>
-          </TouchableOpacity>
+        <Text style={styles.name} numberOfLines={1}>{restaurant.name}</Text>
+        
+        <View style={styles.row}>
+           <MaterialIcons name="star" size={12} color="#eab308" />
+           <Text style={styles.rating}>{restaurant.rating}</Text>
+           <Text style={styles.dot}>•</Text>
+           <Text style={styles.time}>{restaurant.deliveryTime}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -47,82 +31,43 @@ export default function RestaurantCard({ restaurant, onClick }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    width: CARD_WIDTH,
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: SPACING.s,
   },
   image: {
     width: '100%',
-    height: 192,
+    height: 100, // Reduced height for mini card
   },
   content: {
-    padding: 16,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    padding: SPACING.s,
   },
   name: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    flex: 1,
+    fontFamily: FONTS.bold,
+    fontSize: 14,
+    color: COLORS.text,
+    marginBottom: 2,
   },
-  ratingBadge: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#dcfce7',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginLeft: 8,
   },
   rating: {
-    marginLeft: 4,
+    fontFamily: FONTS.regular,
     fontSize: 12,
-    fontWeight: '600',
-    color: '#16a34a',
+    color: COLORS.textLight,
+    marginLeft: 2,
   },
-  cuisine: {
+  dot: {
+    color: COLORS.textLight,
     fontSize: 12,
-    color: '#666',
-    marginBottom: 8,
+    marginHorizontal: 4,
   },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  info: {
-    marginLeft: 4,
+  time: {
+    fontFamily: FONTS.regular,
     fontSize: 12,
-    color: '#999',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  delivery: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#16a34a',
-  },
-  viewButton: {
-    backgroundColor: '#16a34a',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
-  },
-  viewButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    color: COLORS.textLight,
   },
 });
