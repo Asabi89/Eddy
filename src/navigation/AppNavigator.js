@@ -11,13 +11,18 @@ import HomeScreen from '../screens/HomeScreen';
 import RestaurantsScreen from '../screens/RestaurantsScreen';
 import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
 import CartScreen from '../screens/CartScreen';
+import CheckoutScreen from '../screens/CheckoutScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import OrdersScreen from '../screens/OrdersScreen'; 
 import ProfileScreen from '../screens/ProfileScreen';
 import ManagerDashboardScreen from '../screens/ManagerDashboardScreen';
 import DriverDashboardScreen from '../screens/DriverDashboardScreen';
+import DriverScheduleScreen from '../screens/DriverScheduleScreen';
 import AdminDashboardScreen from '../screens/AdminDashboardScreen';
+import ClientProfileScreen from '../screens/ClientProfileScreen';
+import DriverProfileScreen from '../screens/DriverProfileScreen';
+import ManagerProfileScreen from '../screens/ManagerProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -58,6 +63,16 @@ function HomeStack() {
       <Stack.Screen name="HomeMain" component={HomeScreen} />
       <Stack.Screen name="Restaurants" component={RestaurantsScreen} />
       <Stack.Screen name="RestaurantDetail" component={RestaurantDetailScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function CartStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="CartMain" component={CartScreen} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} />
     </Stack.Navigator>
   );
 }
@@ -77,12 +92,12 @@ function ClientTabs() {
       />
       <Tab.Screen 
         name="Panier" 
-        component={CartScreen}
+        component={CartStack}
         options={{ tabBarIcon: ({ color, size }) => <ShoppingCart color={color} size={size} /> }}
       />
       <Tab.Screen 
         name="Profil" 
-        component={ProfileScreen}
+        component={ClientProfileScreen}
         options={{ tabBarIcon: ({ color, size }) => <User color={color} size={size} /> }}
       />
     </Tab.Navigator>
@@ -101,11 +116,9 @@ function ManagerTabs() {
           tabBarIcon: ({ color, size }) => <LayoutDashboard color={color} size={size} /> 
         }}
       />
-      {/* Reusing OrdersScreen but filtering logic will be different inside context if needed, 
-          or ManagerDashboard already has orders list. Let's keep it simple for now. */}
       <Tab.Screen 
         name="Profil" 
-        component={ProfileScreen}
+        component={ManagerProfileScreen}
         options={{ tabBarIcon: ({ color, size }) => <User color={color} size={size} /> }}
       />
     </Tab.Navigator>
@@ -113,12 +126,21 @@ function ManagerTabs() {
 }
 
 // --- Driver Navigation ---
+function DriverStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="DriverMain" component={DriverDashboardScreen} />
+      <Stack.Screen name="DriverSchedule" component={DriverScheduleScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function DriverTabs() {
   return (
     <Tab.Navigator screenOptions={screenOptions}>
       <Tab.Screen 
         name="DriverDashboard" 
-        component={DriverDashboardScreen}
+        component={DriverStack}
         options={{ 
           title: 'Missions',
           tabBarIcon: ({ color, size }) => <Truck color={color} size={size} /> 
@@ -126,7 +148,7 @@ function DriverTabs() {
       />
       <Tab.Screen 
         name="Profil" 
-        component={ProfileScreen}
+        component={DriverProfileScreen}
         options={{ tabBarIcon: ({ color, size }) => <User color={color} size={size} /> }}
       />
     </Tab.Navigator>

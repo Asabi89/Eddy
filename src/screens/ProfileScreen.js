@@ -5,7 +5,18 @@ import { COLORS, SPACING, FONTS } from '../theme';
 import { User, Store, LogOut, Settings, Shield, Truck, LayoutDashboard } from 'lucide-react-native';
 
 export default function ProfileScreen({ navigation }) {
-  const { userMode, setUserRole } = useData();
+  const { userMode, setUserRole, logout, user } = useData();
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Déconnexion',
+      'Êtes-vous sûr de vouloir vous déconnecter ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Oui', onPress: () => logout(), style: 'destructive' }
+      ]
+    );
+  };
 
   const handleRoleSwitch = (role) => {
     setUserRole(role);
@@ -28,8 +39,8 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.avatarContainer}>
           <User size={40} color={COLORS.primary} />
         </View>
-        <Text style={styles.userName}>Utilisateur Local</Text>
-        <Text style={styles.userEmail}>user@local.device</Text>
+        <Text style={styles.userName}>{user?.first_name || user?.username || 'Utilisateur'}</Text>
+        <Text style={styles.userEmail}>{user?.email || 'user@local.device'}</Text>
         <View style={styles.roleBadge}>
           <Text style={styles.roleText}>{getRoleLabel(userMode)}</Text>
         </View>
@@ -94,7 +105,7 @@ export default function ProfileScreen({ navigation }) {
       </View>
 
       <View style={styles.section}>
-        <TouchableOpacity style={[styles.menuItem, styles.logoutButton]}>
+        <TouchableOpacity style={[styles.menuItem, styles.logoutButton]} onPress={handleLogout}>
           <LogOut size={20} color={COLORS.error} />
           <Text style={[styles.menuText, styles.logoutText]}>Déconnexion</Text>
         </TouchableOpacity>

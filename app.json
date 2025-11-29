@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "BeninEats",
+    "slug": "benineats",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,19 +12,50 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "BeninEats a besoin de votre position pour afficher les restaurants à proximité et faciliter la livraison.",
+        "NSCameraUsageDescription": "BeninEats utilise la caméra pour prendre des photos de produits.",
+        "NSPhotoLibraryUsageDescription": "BeninEats utilise la galerie pour sélectionner des images de produits."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.benineats.app",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "BeninEats a besoin de votre position pour afficher les restaurants à proximité."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "BeninEats utilise la galerie pour sélectionner des images.",
+          "cameraPermission": "BeninEats utilise la caméra pour prendre des photos."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "92311f84-1d09-4334-9933-db314b9e31b2"
+      }
+    }
   }
 }

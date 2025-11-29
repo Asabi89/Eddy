@@ -8,20 +8,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert
 } from 'react-native';
 import { COLORS, SPACING, FONTS } from '../theme';
 import { useData } from '../context/DataContext';
+import { Mail, Lock, LogIn } from 'lucide-react-native';
 
 export default function LoginScreen({ navigation }) {
   const { login } = useData();
-  const [isLogin, setIsLogin] = useState(true); // Toggle between Login/Signup UI modes visually if needed, but we have separate screens now. 
-  // Actually, based on AppNavigator, we have separate Login and Signup screens.
-  // So this screen should focus on Login.
-
-  const [email, setEmail] = useState('client@test.com'); // Pre-filled for demo
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -29,195 +26,265 @@ export default function LoginScreen({ navigation }) {
       return;
     }
     
-    // Simple mock logic to determine role based on email for demo purposes
-    let role = 'client';
-    if (email.includes('manager')) role = 'manager';
-    else if (email.includes('driver')) role = 'driver';
-    else if (email.includes('admin')) role = 'admin';
-
-    await login(email, password, role);
-    // Navigation is automatic via AppNavigator state change
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      await login(email, password);
+    } catch (err) {
+      // Parse error message from server
+      let errorMessage = 'Email ou mot de passe incorrect';
+      if (err.message) {
+        if (err.message.includes('Invalid credentials') || err.message.includes('non_field_errors')) {
+          errorMessage = 'Email ou mot de passe incorrect';
+        } else if (err.message.includes('disabled')) {
+          errorMessage = 'Ce compte a été désactivé';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.innerContainer}>
-          <View style={styles.card}>
-            <Text style={styles.title}>Bienvenue sur BeninEats</Text>
-            <Text style={styles.subtitle}>Connectez-vous pour continuer</Text>
-
-            <View style={styles.formContainer}>
-              {error ? <Text style={styles.errorMessage}>{error}</Text> : null}
-
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="email@exemple.com"
-                  placeholderTextColor={COLORS.textLight}
-                  value={email}
-                  onChangeText={setEmail}
-                  autoCapitalize="none"
-                />
-              </View>
-
-              <View style={styles.formGroup}>
-                <Text style={styles.label}>Mot de passe</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor={COLORS.textLight}
-                  secureTextEntry
-                  value={password}
-                  onChangeText={setPassword}
-                />
-              </View>
-
-              <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
-                <Text style={styles.submitButtonText}>Se connecter</Text>
-              </TouchableOpacity>
-
-              <View style={styles.footer}>
-                <Text style={styles.footerText}>Pas encore de compte ? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                  <Text style={styles.linkText}>S'inscrire</Text>
-                </TouchableOpacity>
-              </View>
-              
-              {/* Demo Hints */}
-              <View style={styles.demoHints}>
-                <Text style={styles.demoTitle}>Comptes de démo :</Text>
-                <Text style={styles.demoText}>• client@test.com</Text>
-                <Text style={styles.demoText}>• manager@test.com</Text>
-                <Text style={styles.demoText}>• driver@test.com</Text>
-                <Text style={styles.demoText}>• admin@test.com</Text>
-              </View>
+    <View style={styles.container}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent} 
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Logo/Brand Section */}
+          <View style={styles.brandSection}>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logoEmoji}>🍽️</Text>
             </View>
+            <Text style={styles.brandName}>BeninEats</Text>
+            <Text style={styles.brandTagline}>Savourez le Bénin, livré chez vous</Text>
           </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+          {/* Login Form */}
+          <View style={styles.formSection}>
+            <Text style={styles.title}>Connexion</Text>
+            
+            {error ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorMessage}>{error}</Text>
+              </View>
+            ) : null}
+
+            <View style={styles.inputGroup}>
+              <View style={styles.inputIcon}>
+                <Mail size={20} color={COLORS.textLight} />
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="kendouola@email.com"
+                placeholderTextColor="#666"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <View style={styles.inputIcon}>
+                <Lock size={20} color={COLORS.textLight} />
+              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Mot de passe"
+                placeholderTextColor="#666"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+
+            <TouchableOpacity 
+              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <LogIn size={20} color="#fff" />
+              <Text style={styles.loginButtonText}>
+                {isLoading ? 'Connexion...' : 'Se connecter'}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>ou</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity 
+              style={styles.signupButton}
+              onPress={() => navigation.navigate('Signup')}
+            >
+              <Text style={styles.signupButtonText}>Créer un compte</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.primary,
+    backgroundColor: '#1a1a2e',
+  },
+  keyboardView: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    paddingVertical: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
-  innerContainer: {
-    paddingHorizontal: 16,
+  brandSection: {
+    alignItems: 'center',
+    marginBottom: 40,
   },
-  card: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+  logoContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  logoEmoji: {
+    fontSize: 36,
+  },
+  brandName: {
+    fontFamily: FONTS.bold,
+    fontSize: 32,
+    color: '#fff',
+    marginBottom: 8,
+  },
+  brandTagline: {
+    fontFamily: FONTS.regular,
+    fontSize: 14,
+    color: '#888',
+  },
+  formSection: {
+    backgroundColor: '#16213e',
+    borderRadius: 20,
     padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
   },
   title: {
     fontFamily: FONTS.bold,
     fontSize: 24,
-    fontWeight: 'bold',
+    color: '#fff',
     textAlign: 'center',
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontFamily: FONTS.regular,
-    fontSize: 14,
-    textAlign: 'center',
-    color: COLORS.textLight,
     marginBottom: 24,
   },
-  formContainer: {
-    // padding removed as card has padding
+  errorContainer: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
   errorMessage: {
-    backgroundColor: '#fee2e2',
-    color: COLORS.error,
-    padding: 12,
-    borderRadius: 6,
-    marginBottom: 16,
+    color: '#ef4444',
     fontSize: 13,
-    fontFamily: FONTS.bold,
+    fontFamily: FONTS.regular,
+    textAlign: 'center',
   },
-  formGroup: {
+  inputGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0f3460',
+    borderRadius: 12,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#1a4a7a',
   },
-  label: {
-    fontFamily: FONTS.bold,
-    fontSize: 13,
-    fontWeight: '600',
-    color: COLORS.text,
-    marginBottom: 6,
+  inputIcon: {
+    padding: 14,
+    borderRightWidth: 1,
+    borderRightColor: '#1a4a7a',
   },
   input: {
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-    color: COLORS.text,
+    flex: 1,
+    padding: 14,
     fontFamily: FONTS.regular,
-    backgroundColor: COLORS.background,
+    fontSize: 15,
+    color: '#fff',
   },
-  submitButton: {
+  loginButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: 12,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  submitButtonText: {
-    color: COLORS.textWhite,
-    fontFamily: FONTS.bold,
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  footer: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 8,
+    gap: 8,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  footerText: {
-    fontFamily: FONTS.regular,
-    color: COLORS.textLight,
+  loginButtonDisabled: {
+    opacity: 0.7,
   },
-  linkText: {
+  loginButtonText: {
+    color: '#fff',
     fontFamily: FONTS.bold,
+    fontSize: 16,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#1a4a7a',
+  },
+  dividerText: {
+    color: '#666',
+    fontFamily: FONTS.regular,
+    fontSize: 13,
+    marginHorizontal: 16,
+  },
+  signupButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  signupButtonText: {
     color: COLORS.primary,
-  },
-  demoHints: {
-    marginTop: 32,
-    padding: 16,
-    backgroundColor: COLORS.background,
-    borderRadius: 8,
-  },
-  demoTitle: {
     fontFamily: FONTS.bold,
-    color: COLORS.textLight,
-    marginBottom: 8,
-    fontSize: 12,
-  },
-  demoText: {
-    fontFamily: FONTS.regular,
-    color: COLORS.textLight,
-    fontSize: 12,
-    marginBottom: 4,
+    fontSize: 15,
   },
 });

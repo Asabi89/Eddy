@@ -15,30 +15,15 @@ import { COLORS, SPACING, FONTS } from '../theme';
 import { ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react-native';
 
 export default function CartScreen({ navigation }) {
-  const { cart, updateCartQuantity, removeFromCart, placeOrder } = useData();
+  const { cart, updateCartQuantity, removeFromCart } = useData();
   const deliveryFee = 500; // Hardcoded for demo
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal + (cart.length > 0 ? deliveryFee : 0);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cart.length === 0) return;
-
-    Alert.alert(
-      'Confirmation',
-      'Voulez-vous passer la commande ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Commander',
-          onPress: async () => {
-            await placeOrder();
-            Alert.alert('Succès', 'Votre commande a été enregistrée localement.');
-            navigation.navigate('Commandes');
-          }
-        }
-      ]
-    );
+    navigation.navigate('Checkout');
   };
 
   return (

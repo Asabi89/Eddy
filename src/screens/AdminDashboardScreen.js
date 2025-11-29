@@ -9,9 +9,9 @@ const { width } = Dimensions.get('window');
 
 export default function AdminDashboardScreen() {
   const insets = useSafeAreaInsets();
-  const { orders, drivers, products } = useData();
+  const { orders = [], products = [], companies = [] } = useData();
 
-  const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
   const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
 
@@ -49,8 +49,8 @@ export default function AdminDashboardScreen() {
             color={COLORS.primary} 
           />
           <StatCard 
-            title="Livreurs Actifs" 
-            value={drivers.length} 
+            title="Restaurants" 
+            value={companies.length} 
             icon={Users} 
             color={COLORS.secondary} 
           />
@@ -89,7 +89,7 @@ export default function AdminDashboardScreen() {
                 Nouvelle commande de {order.total} FCFA
               </Text>
               <Text style={styles.activityTime}>
-                {new Date(order.date).toLocaleTimeString()}
+                {new Date(order.created_at || order.date).toLocaleTimeString()}
               </Text>
             </View>
           </View>

@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Switch } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useData } from '../context/DataContext';
 import { COLORS, SPACING, FONTS } from '../theme';
-import { MapPin, CheckCircle, Phone } from 'lucide-react-native';
+import { MapPin, CheckCircle, Phone, Calendar } from 'lucide-react-native';
 
-export default function DriverDashboardScreen() {
+export default function DriverDashboardScreen({ navigation }) {
   const insets = useSafeAreaInsets();
-  const { orders, updateOrderStatus } = useData();
+  const { orders, updateOrderStatus, driverAvailability, toggleDriverAvailability } = useData();
   const currentDriverId = 'd1'; // Mocked logged-in driver
 
   // Filter orders assigned to this driver or available for pickup if we had a pool
@@ -54,11 +54,41 @@ export default function DriverDashboardScreen() {
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + SPACING.m }]}>
         <Text style={styles.headerTitle}>Espace Livreur</Text>
-        <View style={styles.statusIndicator}>
-          <View style={styles.onlineDot} />
-          <Text style={styles.statusText}>En ligne</Text>
-        </View>
+        <TouchableOpacity 
+          style={[
+            styles.statusIndicator, 
+            { borderColor: driverAvailability ? COLORS.success : COLORS.textLight }
+          ]}
+          onPress={toggleDriverAvailability}
+          activeOpacity={0.7}
+        >
+          <View style={[
+            styles.onlineDot, 
+            { backgroundColor: driverAvailability ? COLORS.success : COLORS.textLight }
+          ]} />
+          <Text style={[
+            styles.statusText, 
+            { color: driverAvailability ? COLORS.success : COLORS.textLight }
+          ]}>
+            {driverAvailability ? 'Disponible' : 'Indisponible'}
+          </Text>
+          <Switch
+            value={driverAvailability}
+            onValueChange={toggleDriverAvailability}
+            trackColor={{ false: COLORS.border, true: COLORS.success + '50' }}
+            thumbColor={driverAvailability ? COLORS.success : COLORS.textLight}
+            style={styles.availabilitySwitch}
+          />
+        </TouchableOpacity>
       </View>
+
+      <TouchableOpacity 
+        style={styles.scheduleButton}
+        onPress={() => navigation.navigate('DriverSchedule')}
+      >
+        <Calendar size={20} color={COLORS.primary} />
+        <Text style={styles.scheduleButtonText}>Gérer mon planning</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={myMissions.filter(o => o.status !== 'delivered')}
@@ -155,6 +185,28 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     fontSize: 12,
     color: COLORS.success,
+  },
+  availabilitySwitch: {
+    marginLeft: 8,
+    transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
+  },
+  scheduleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary + '15',
+    marginHorizontal: SPACING.m,
+    marginTop: SPACING.m,
+    padding: SPACING.m,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: COLORS.primary + '30',
+  },
+  scheduleButtonText: {
+    fontFamily: FONTS.bold,
+    fontSize: 14,
+    color: COLORS.primary,
   },
   content: {
     padding: SPACING.m,

@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
-import { Search, MapPin } from 'lucide-react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Search, MapPin, RefreshCw } from 'lucide-react-native';
 import { COLORS, SPACING, FONTS } from '../theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useData } from '../context/DataContext';
 
 export default function Header({ showSearch = true }) {
   const insets = useSafeAreaInsets();
+  const { userLocation, locationLoading, refreshLocation } = useData();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -14,10 +16,22 @@ export default function Header({ showSearch = true }) {
           <Text style={styles.appName}>BeninEats</Text>
         </View>
         
-        <View style={styles.locationContainer}>
-          <MapPin size={14} color={COLORS.primary} />
-          <Text style={styles.locationText}>Cotonou, Bénin</Text>
-        </View>
+        <TouchableOpacity 
+          style={styles.locationContainer}
+          onPress={refreshLocation}
+          disabled={locationLoading}
+        >
+          {locationLoading ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : (
+            <>
+              <MapPin size={14} color={COLORS.primary} />
+              <Text style={styles.locationText} numberOfLines={1}>
+                {userLocation?.city || 'Localisation...'}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
       </View>
 
       {showSearch && (
@@ -85,6 +99,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.regular,
     fontSize: 12,
     color: COLORS.text,
+    maxWidth: 120,
   },
   searchContainer: {
     flexDirection: 'row',

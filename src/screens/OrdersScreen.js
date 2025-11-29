@@ -44,7 +44,7 @@ export default function OrdersScreen() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Text style={styles.orderId}>Commande #{item.id.slice(-6)}</Text>
+              <Text style={styles.orderId}>Commande #{String(item.id).slice(-6)}</Text>
               <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
                 <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
                   {getStatusLabel(item.status)}
@@ -53,18 +53,18 @@ export default function OrdersScreen() {
             </View>
             
             <Text style={styles.date}>
-              {new Date(item.date).toLocaleDateString()} à {new Date(item.date).toLocaleTimeString()}
+              {new Date(item.created_at || item.date).toLocaleDateString('fr-FR')} à {new Date(item.created_at || item.date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
             </Text>
 
             <View style={styles.divider} />
 
-            {item.items.map((product, index) => (
+            {item.items?.map((product, index) => (
               <View key={index} style={styles.productRow}>
                 <Text style={styles.productText}>
-                  {product.quantity}x {product.name}
+                  {product.quantity}x {product.product_name || product.name}
                 </Text>
                 <Text style={styles.productPrice}>
-                  {product.price * product.quantity} FCFA
+                  {((product.product_price || product.price) * product.quantity).toLocaleString()} FCFA
                 </Text>
               </View>
             ))}
@@ -73,7 +73,7 @@ export default function OrdersScreen() {
 
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalAmount}>{item.total} FCFA</Text>
+              <Text style={styles.totalAmount}>{(item.total || 0).toLocaleString()} FCFA</Text>
             </View>
           </View>
         )}

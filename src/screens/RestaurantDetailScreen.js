@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,19 @@ import {
   StyleSheet,
   Image,
   SectionList,
-  Alert
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useData } from '../context/DataContext';
 import { COLORS, SPACING, FONTS } from '../theme';
 import { Plus } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import CustomModal from '../components/CustomModal';
 
 export default function RestaurantDetailScreen({ route, navigation }) {
   const { restaurant } = route.params || {};
   const { products, addToCart } = useData();
   const insets = useSafeAreaInsets();
+  const [modal, setModal] = useState({ visible: false, title: '', message: '' });
 
   // Guard clause
   if (!restaurant) {
@@ -33,7 +34,7 @@ export default function RestaurantDetailScreen({ route, navigation }) {
   const restaurantProducts = products.filter(p => p.restaurantId === restaurant.id || !p.restaurantId);
 
   const groupedMenu = restaurantProducts.reduce((acc, item) => {
-    const category = item.category || 'Autres';
+    const category = item.category_name || item.category || 'Autres';
     const section = acc.find((s) => s.title === category);
     if (section) {
       section.data.push(item);
@@ -45,7 +46,12 @@ export default function RestaurantDetailScreen({ route, navigation }) {
 
   const handleAddToCart = (item) => {
     addToCart(item);
-    Alert.alert('Ajouté', `${item.name} a été ajouté au panier`);
+    setModal({
+      visible: true,
+      type: 'success',
+      title: 'Ajouté au panier ! 🛒',
+      message: `${item.name} a été ajouté à votre panier.`,
+    });
   };
 
   const renderMenuItem = ({ item }) => (
@@ -124,6 +130,14 @@ export default function RestaurantDetailScreen({ route, navigation }) {
           renderItem={renderMenuItem}
           renderSectionHeader={renderSectionHeader}
           stickySectionHeadersEnabled={false}
+        />
+
+        <CustomModal
+          visible={modal.visible}
+          onClose={() => setModal({ ...modal, visible: false })}
+          type={modal.type}
+          title={modal.title}
+          message={modal.message}
         />
     </View>
   );
